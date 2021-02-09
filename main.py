@@ -10,11 +10,16 @@ class Card:
     def __str__(self):
         return f'Card({self.suit}, {self.rank})'
 
+    def __eq__(self, other):
+        if self.rank == other.rank and self.suit == other.suit:
+            return True
+        return False
+
 
 class Suit(enum.Enum):
     Spades = 1
     Diamonds = 2
-    Heart = 3
+    Hearts = 3
     Clubs = 4
 
     def __str__(self):
@@ -37,7 +42,8 @@ class Rank(enum.Enum):
     King = 13
 
     def __str__(self):
-        return self.name[1:] if self.name.startswith('_') else self.name
+        name = "" + self.name
+        return name[1:] if name.startswith('_') else name
 
 
 class Deck:
@@ -48,24 +54,30 @@ class Deck:
     def shuffle(self):
         random.shuffle(self.cards)
 
-    def getCard(self):
+    def get_card(self):
         if len(self.cards) == 0:
-            raise Exception("There is no card left in the deck")
+            raise TypeError("There is no card left in the deck")
         return self.cards.pop()
 
-    def sort(self, suitOrder):
+    def sort(self, suit_order):
         cards = []
-        for suit in suitOrder:
-            suitCards = [
+        for suit in suit_order:
+            suit_cards = [
                 card for card in self.cards if suit.name == card.suit.name]
-            suitCards.sort(key=lambda x: x.rank.value)
-            cards.extend(suitCards)
+            suit_cards.sort(key=lambda x: x.rank.value)
+            cards.extend(suit_cards)
 
         self.cards = cards
 
     def print(self):
         for idx, card in enumerate(self.cards):
             print(f'{idx+1}.- {card}')
+
+    def __eq__(self, other):
+        for scard, ocard in zip(self.cards, other.cards):
+            if scard != ocard:
+                return False
+        return True
 
 
 class Player:
@@ -74,7 +86,7 @@ class Player:
         self.name = name
         self.score = 0
 
-    def takeCard(self, card):
+    def take_card(self, card):
         self.cards.append(card)
         self.score += card.suit.value * card.rank.value
 
@@ -86,7 +98,7 @@ class Player:
 
 class Game:
 
-    def howWins(_, player1, player2):
+    def how_wins(self, player1, player2):
         return player1 if player1.score > player2.score else player2
 
     def start(self):
@@ -99,30 +111,30 @@ class Game:
         deck.shuffle()
         deck.print()
 
-        # # Pop a card
-        card = deck.getCard()
+        # Pop a card
+        card = deck.get_card()
         print(card)
 
-        # # sort
-        deck.sort([Suit.Spades, Suit.Diamonds, Suit.Heart, Suit.Clubs])
+        # sort
+        deck.sort([Suit.Spades, Suit.Diamonds, Suit.Hearts, Suit.Clubs])
         deck.print()
 
         # pop all cards until exception
-        for _ in range(52):
-            deck.getCard()
+        # for _ in range(52):
+        #     deck.get_card()
 
         deck.shuffle()
         player1 = Player("Alice")
         player2 = Player("Bob")
 
         for _ in range(3):
-            player1.takeCard(deck.getCard())
-            player2.takeCard(deck.getCard())
+            player1.take_card(deck.get_card())
+            player2.take_card(deck.get_card())
 
         player1.print()
         player2.print()
 
-        winner = self.howWins(player1, player2)
+        winner = self.how_wins(player1, player2)
 
         print(">>>>>>Player wins<<<<<<")
         winner.print()
